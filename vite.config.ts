@@ -4,13 +4,21 @@ import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react-swc";
 import { defineConfig } from "vite";
 
+const certFiles = fs.readdirSync(".").filter((f) => f.endsWith(".pem") && !f.includes("key"));
+const keyFiles = fs.readdirSync(".").filter((f) => f.endsWith("-key.pem"));
+
+const httpsConfig =
+  certFiles.length && keyFiles.length
+    ? {
+        cert: fs.readFileSync(certFiles[0]),
+        key: fs.readFileSync(keyFiles[0]),
+      }
+    : undefined;
+
 export default defineConfig({
   plugins: [react(), tailwindcss()],
   server: {
-    https: {
-      cert: fs.readFileSync("192.168.18.243.pem"),
-      key: fs.readFileSync("192.168.18.243-key.pem"),
-    },
+    https: httpsConfig,
     host: true,
   },
   resolve: {
